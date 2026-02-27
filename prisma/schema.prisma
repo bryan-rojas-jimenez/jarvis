@@ -1,0 +1,73 @@
+
+// Esquema de Base de Datos para JARVIS - Gestión de Tareas
+// Generado para el Trabajo Final de Programación 3
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo de Usuario (Cumple con: Gestión de Usuarios y Roles)
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String   // Contraseña encriptada (Seguridad Básica)
+  name      String?
+  role      String   @default("USER") // Roles: ADMIN, USER
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relaciones
+  projects  Project[] // Proyectos creados por el usuario
+  tasks     Task[]    // Tareas asignadas al usuario
+  logs      AuditLog[] // Historial de acciones del usuario
+}
+
+// Modelo de Proyecto (Cumple con: Organización del Trabajo)
+model Project {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  status      String   @default("ACTIVE") // ACTIVE, COMPLETED, ARCHIVED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relaciones
+  ownerId     Int
+  owner       User     @relation(fields: [ownerId], references: [id])
+  tasks       Task[]   // Tareas dentro del proyecto
+}
+
+// Modelo de Tarea (Cumple con: Gestión de Tareas y Kanban)
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  status      String   @default("TODO") // Estados: TODO, IN_PROGRESS, DONE
+  priority    String   @default("MEDIUM") // Prioridad: LOW, MEDIUM, HIGH, URGENT
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  projectId   Int
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assigneeId  Int?
+  assignee    User?    @relation(fields: [assigneeId], references: [id])
+}
+
+// Modelo de Auditoría (Cumple con: Seguridad y Trazabilidad)
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  action    String   // Ej: "LOGIN", "CREATE_PROJECT", "DELETE_TASK"
+  details   String?  // Detalles adicionales de la acción
+  timestamp DateTime @default(now())
+  
+  // Relaciones
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+}
