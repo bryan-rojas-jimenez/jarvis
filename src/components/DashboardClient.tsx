@@ -77,8 +77,12 @@ export default function DashboardClient({ projects, userName, userRole, stats }:
               
               <div className="hidden md:flex items-center gap-1">
                 <Link href="/" className="px-4 py-2 bg-slate-50 text-indigo-600 rounded-lg font-bold text-sm">Dashboard</Link>
+                <Link href="/my-tasks" className="px-4 py-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors">
+                  <ListTodo size={16} />
+                  My Tasks
+                </Link>
                 {userRole === 'ADMIN' && (
-                  <Link href="/audit" className="px-4 py-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 rounded-lg font-bold text-sm flex items-center gap-2">
+                  <Link href="/audit" className="px-4 py-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors">
                     <ShieldAlert size={16} />
                     Audit Logs
                   </Link>

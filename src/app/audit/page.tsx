@@ -2,7 +2,7 @@ import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ShieldAlert, Clock } from "lucide-react";
+import { ArrowLeft, ShieldAlert, Clock, LayoutDashboard } from "lucide-react";
 
 export default async function AuditPage() {
   const session = await getSession();
@@ -21,65 +21,99 @@ export default async function AuditPage() {
     },
     include: {
       user: {
-        select: { name: true, email: true, role: true }, // Added role
+        select: { name: true, email: true, role: true },
       },
     },
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* ... nav ... */}
-
-      <main className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-          <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
-            <div>
-              <h3 className="text-lg leading-6 font-medium text-gray-900">Activity History</h3>
-              <p className="mt-1 max-w-2xl text-sm text-gray-500">Latest system actions and security events.</p>
+    <div className="min-h-screen bg-[#f8fafc]">
+      <nav className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div className="max-w-[1600px] mx-auto px-6 lg:px-10">
+          <div className="flex justify-between h-20">
+            <div className="flex items-center gap-4">
+              <Link href="/" className="p-2 hover:bg-slate-50 rounded-xl transition-colors group text-slate-500 hover:text-indigo-600">
+                <ArrowLeft size={24} className="group-hover:-translate-x-1 transition-transform" />
+              </Link>
+              <div className="h-6 w-px bg-slate-200" />
+              <div className="flex items-center gap-3">
+                <div className="bg-purple-100 p-2 rounded-xl text-purple-600 shadow-sm">
+                  <ShieldAlert size={20} />
+                </div>
+                <h1 className="text-xl font-black text-slate-900 tracking-tight">System Audit</h1>
+              </div>
             </div>
-            <span className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+            
+            <div className="flex items-center">
+              <Link href="/" className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg shadow-slate-200">
+                <LayoutDashboard size={14} />
+                Home
+              </Link>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <main className="max-w-5xl mx-auto py-12 px-6 lg:px-10">
+        <header className="mb-10">
+          <h2 className="text-3xl font-black text-slate-900 mb-2">Activity Monitor</h2>
+          <p className="text-slate-500 font-medium text-sm">Real-time security logs and system operations history.</p>
+        </header>
+
+        <div className="bg-white shadow-sm border border-slate-200 rounded-[32px] overflow-hidden">
+          <div className="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+            <span className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Latest Events</span>
+            <span className="bg-indigo-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase shadow-sm">
               {logs.length} Entries
             </span>
           </div>
-          <div className="border-t border-gray-200">
-            <ul role="list" className="divide-y divide-gray-200">
+          
+          <div className="overflow-x-auto">
+            <ul role="list" className="divide-y divide-slate-100">
               {logs.map((log) => (
-                <li key={log.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 truncate">
-                      <p className="text-sm font-medium text-indigo-600 truncate">
-                        {log.action}
-                      </p>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <span className="truncate">{log.details}</span>
+                <li key={log.id} className="px-8 py-6 hover:bg-slate-50/80 transition-all group">
+                  <div className="flex items-center justify-between gap-6">
+                    <div className="flex flex-col gap-1 min-w-0">
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-black text-indigo-600 tracking-tight whitespace-nowrap">
+                          {log.action}
+                        </span>
+                        <div className="h-1 w-1 rounded-full bg-slate-200" />
+                        <span className="text-sm font-medium text-slate-600 truncate">
+                          {log.details}
+                        </span>
                       </div>
                     </div>
-                    <div className="ml-2 flex-shrink-0 flex flex-col items-end">
-                      <div className="flex items-center gap-2">
-                        {log.user?.role && (
-                          <span className={`px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-tighter ${
-                            log.user.role === 'ADMIN' ? 'bg-purple-100 text-purple-700 border border-purple-200' : 'bg-gray-100 text-gray-600 border border-gray-200'
-                          }`}>
-                            {log.user.role}
+                    
+                    <div className="flex items-center gap-6 shrink-0">
+                      <div className="flex flex-col items-end">
+                        <div className="flex items-center gap-2 mb-1">
+                          {log.user?.role && (
+                            <span className={`px-2 py-0.5 text-[9px] font-black rounded uppercase tracking-widest border ${
+                              log.user.role === 'ADMIN' ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-slate-100 text-slate-500 border-slate-200'
+                            }`}>
+                              {log.user.role}
+                            </span>
+                          )}
+                          <span className="text-xs font-bold text-slate-900 whitespace-nowrap">
+                            {log.user?.name || log.user?.email || 'System'}
                           </span>
-                        )}
-                        <p className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                          {log.user?.name || log.user?.email || 'System'}
-                        </p>
-                      </div>
-                      <div className="mt-1 flex items-center text-xs text-gray-500">
-                        <Clock className="flex-shrink-0 mr-1.5 h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
-                        <p>
+                        </div>
+                        <div className="flex items-center text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                          <Clock className="shrink-0 mr-1.5 h-3 w-3" />
                           {new Date(log.timestamp).toLocaleString()}
-                        </p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </li>
               ))}
               {logs.length === 0 && (
-                <li className="px-4 py-12 text-center text-gray-500">
-                  No activity recorded yet.
+                <li className="px-8 py-20 text-center">
+                  <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                    <ShieldAlert size={24} className="text-slate-200" />
+                  </div>
+                  <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">No activity recorded</p>
                 </li>
               )}
             </ul>
