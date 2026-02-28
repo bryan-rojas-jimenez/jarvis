@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import ProjectForm from './ProjectForm';
-import { Plus, FolderOpen, Calendar, MoreVertical, ShieldAlert, Trash2, Edit2, Search, X, Filter, LayoutGrid, List } from 'lucide-react';
+import { Plus, FolderOpen, Calendar, MoreVertical, ShieldAlert, Trash2, Edit2, Search, X, Filter, LayoutGrid, List, ListTodo } from 'lucide-react';
 import Link from 'next/link';
 import { logoutAction, deleteProjectAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
