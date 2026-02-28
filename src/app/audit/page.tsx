@@ -8,6 +8,11 @@ export default async function AuditPage() {
   const session = await getSession();
   if (!session) redirect("/login");
 
+  // Check for ADMIN role
+  if (session.user.role !== 'ADMIN') {
+    redirect("/");
+  }
+
   // Fetch the last 100 logs
   const logs = await db.auditLog.findMany({
     take: 100,
@@ -16,30 +21,14 @@ export default async function AuditPage() {
     },
     include: {
       user: {
-        select: { name: true, email: true },
+        select: { name: true, email: true, role: true }, // Added role
       },
     },
   });
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/" className="flex items-center text-gray-500 hover:text-gray-700 transition-colors">
-                <ArrowLeft className="h-5 w-5 mr-2" />
-                <span className="text-sm font-medium">Dashboard</span>
-              </Link>
-              <div className="mx-4 h-6 w-px bg-gray-200" />
-              <div className="flex items-center gap-2">
-                <ShieldAlert className="h-5 w-5 text-indigo-600" />
-                <span className="text-lg font-bold text-gray-900">System Audit Logs</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+      {/* ... nav ... */}
 
       <main className="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
@@ -66,9 +55,18 @@ export default async function AuditPage() {
                       </div>
                     </div>
                     <div className="ml-2 flex-shrink-0 flex flex-col items-end">
-                      <p className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                        {log.user?.name || log.user?.email || 'System'}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        {log.user?.role && (
+                          <span className={`px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-tighter ${
+                            log.user.role === 'ADMIN' ? 'bg-purple-100 text-purple-700 border border-purple-200' : 'bg-gray-100 text-gray-600 border border-gray-200'
+                          }`}>
+                            {log.user.role}
+                          </span>
+                        )}
+                        <p className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                          {log.user?.name || log.user?.email || 'System'}
+                        </p>
+                      </div>
                       <div className="mt-1 flex items-center text-xs text-gray-500">
                         <Clock className="flex-shrink-0 mr-1.5 h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
                         <p>

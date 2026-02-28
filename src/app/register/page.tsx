@@ -2,62 +2,83 @@
 
 import { registerAction } from '@/app/actions';
 import Link from 'next/link';
+import { FolderOpen, ArrowRight, Mail, Lock, User } from 'lucide-react';
 
 export default function RegisterPage() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded shadow-md">
-        <h2 className="text-3xl font-extrabold text-center text-gray-900">JARVIS - Register</h2>
-        <form className="mt-8 space-y-6" action={registerAction}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Name"
-              />
-            </div>
-            <div>
-              <input
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-              />
-            </div>
-            <div>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-              />
-            </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#f8fafc] p-6">
+      <div className="w-full max-w-md">
+        <div className="flex flex-col items-center mb-10 text-center">
+          <div className="bg-indigo-600 p-3 rounded-2xl shadow-xl shadow-indigo-200 mb-6">
+            <FolderOpen className="h-10 w-10 text-white" />
           </div>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Create Account</h1>
+          <p className="text-slate-500 font-medium mt-2">Join the next generation of project management.</p>
+        </div>
 
-          <div>
+        <div className="bg-white p-10 rounded-[40px] shadow-2xl shadow-slate-200/60 border border-slate-100">
+          <h2 className="text-xl font-black text-slate-900 mb-8 tracking-tight">Get started for free</h2>
+          
+          <form action={registerAction} className="space-y-6">
+            <div className="space-y-4">
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-600 transition-colors">
+                  <User size={18} />
+                </div>
+                <input
+                  name="name"
+                  type="text"
+                  required
+                  className="block w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all font-medium text-slate-900 placeholder-slate-400 shadow-inner"
+                  placeholder="Full name"
+                />
+              </div>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-600 transition-colors">
+                  <Mail size={18} />
+                </div>
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  className="block w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all font-medium text-slate-900 placeholder-slate-400 shadow-inner"
+                  placeholder="name@company.com"
+                />
+              </div>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-600 transition-colors">
+                  <Lock size={18} />
+                </div>
+                <input
+                  name="password"
+                  type="password"
+                  required
+                  className="block w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all font-medium text-slate-900 placeholder-slate-400 shadow-inner"
+                  placeholder="Create a password"
+                />
+              </div>
+            </div>
+
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="group w-full py-4 bg-slate-900 text-white font-black rounded-2xl shadow-xl shadow-slate-200 hover:bg-indigo-600 hover:shadow-indigo-200 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
             >
-              Sign up
+              Register & Access
+              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </button>
+          </form>
+
+          <div className="mt-10 text-center">
+            <p className="text-slate-500 font-medium text-sm mb-4">Already have an account?</p>
+            <Link href="/login" className="inline-flex items-center px-6 py-3 bg-indigo-50 text-indigo-600 font-black rounded-xl hover:bg-indigo-100 transition-all text-xs uppercase tracking-widest">
+              Sign in here
+            </Link>
           </div>
-        </form>
-        <div className="text-center">
-          <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
-            Already have an account? Login here
-          </Link>
         </div>
+        
+        <p className="text-center text-slate-400 text-xs font-bold mt-8 uppercase tracking-[0.2em]">
+          &copy; 2026 JARVIS Management System
+        </p>
       </div>
     </div>
   );

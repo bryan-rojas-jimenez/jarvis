@@ -24,5 +24,38 @@ export default async function Home() {
     },
   });
 
-  return <DashboardClient projects={projects} userName={session.user.name || session.user.email} />;
+  // Calculate stats for all projects
+  const taskStats = await db.task.groupBy({
+    by: ['status'],
+    where: {
+      project: {
+        ownerId: session.user.id
+      }
+    },
+    _count: true
+  });
+
+  const priorityStats = await db.task.groupBy({
+    by: ['priority'],
+    where: {
+      project: {
+        ownerId: session.user.id
+      }
+    },
+    _count: true
+  });
+
+  const stats = {
+    totalProjects: projects.length,
+    totalTasks: taskStats.reduce((acc, curr) => acc + curr._count, 0),
+    byStatus: taskStats.reduce((acc, curr) => ({ ...acc, [curr.status]: curr._count }), { TODO: 0, IN_PROGRESS: 0, DONE: 0 }),
+    byPriority: priorityStats.reduce((acc, curr) => ({ ...acc, [curr.priority]: curr._count }), { LOW: 0, MEDIUM: 0, HIGH: 0, URGENT: 0 }),
+  };
+
+  return <DashboardClient 
+    projects={projects} 
+    userName={session.user.name || session.user.email} 
+    userRole={session.user.role} 
+    stats={stats} 
+  />;
 }
