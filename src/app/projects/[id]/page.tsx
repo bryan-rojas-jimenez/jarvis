@@ -42,11 +42,12 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
 
   if (!project) notFound();
 
-  // Check if user is owner OR a member
+  // Check if user is owner OR a member OR has an assigned task
   const isOwner = project.ownerId === session.user.id;
   const isMember = project.members.some(m => m.userId === session.user.id);
+  const hasAssignedTask = project.tasks.some(t => t.assigneeId === session.user.id);
 
-  if (!isOwner && !isMember) {
+  if (!isOwner && !isMember && !hasAssignedTask) {
     redirect("/");
   }
 

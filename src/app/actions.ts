@@ -134,6 +134,15 @@ export async function createTaskAction(formData: FormData) {
     },
   });
 
+  // If there is an assignee, ensure they are added as a member
+  if (assigneeId) {
+    await db.projectMember.upsert({
+      where: { projectId_userId: { projectId, userId: assigneeId } },
+      update: {},
+      create: { projectId, userId: assigneeId, role: 'MEMBER' }
+    });
+  }
+
   await db.auditLog.create({
     data: {
       action: 'CREATE_TASK',
@@ -160,6 +169,15 @@ export async function updateTaskAction(taskId: number, formData: FormData, proje
     where: { id: taskId },
     data: { title, description, priority, assigneeId },
   });
+
+  // If there is an assignee, ensure they are added as a member
+  if (assigneeId) {
+    await db.projectMember.upsert({
+      where: { projectId_userId: { projectId, userId: assigneeId } },
+      update: {},
+      create: { projectId, userId: assigneeId, role: 'MEMBER' }
+    });
+  }
 
   await db.auditLog.create({
     data: {
