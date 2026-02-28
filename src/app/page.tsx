@@ -12,7 +12,10 @@ export default async function Home() {
 
   const projects = await db.project.findMany({
     where: {
-      ownerId: session.user.id,
+      OR: [
+        { ownerId: session.user.id },
+        { members: { some: { userId: session.user.id } } }
+      ]
     },
     orderBy: {
       updatedAt: 'desc',
@@ -21,6 +24,16 @@ export default async function Home() {
       _count: {
         select: { tasks: true },
       },
+      owner: {
+        select: { name: true, email: true }
+      },
+      members: {
+        include: {
+          user: {
+            select: { name: true, email: true }
+          }
+        }
+      }
     },
   });
 

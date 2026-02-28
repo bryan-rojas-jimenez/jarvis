@@ -23,9 +23,10 @@ model User {
   updatedAt DateTime @updatedAt
   
   // Relaciones
-  projects  Project[] // Proyectos creados por el usuario
-  tasks     Task[]    // Tareas asignadas al usuario
-  logs      AuditLog[] // Historial de acciones del usuario
+  ownedProjects Project[] @relation("ProjectOwner")
+  memberships   ProjectMember[]
+  tasks         Task[]    // Tareas asignadas al usuario
+  logs          AuditLog[] // Historial de acciones del usuario
 }
 
 // Modelo de Proyecto (Cumple con: Organización del Trabajo)
@@ -39,8 +40,23 @@ model Project {
   
   // Relaciones
   ownerId     Int
-  owner       User     @relation(fields: [ownerId], references: [id])
+  owner       User     @relation("ProjectOwner", fields: [ownerId], references: [id])
+  members     ProjectMember[]
   tasks       Task[]   // Tareas dentro del proyecto
+}
+
+// Tabla intermedia para colaboración
+model ProjectMember {
+  id        Int      @id @default(autoincrement())
+  role      String   @default("MEMBER") // OWNER, MEMBER, VIEWER
+  
+  projectId Int
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
 }
 
 // Modelo de Tarea (Cumple con: Gestión de Tareas y Kanban)

@@ -192,6 +192,53 @@ export async function updateTaskStatusAction(taskId: number, status: string, pro
   revalidatePath(`/projects/${projectId}`);
 }
 
+export async function addProjectMemberAction(projectId: number, userId: number) {
+  const session = await getSession();
+  if (!session || !session.user || !session.user.id) throw new Error('Unauthorized');
+
+  // Verify ownership
+  const project = await db.project.findUnique({ where: { id: projectId } });
+  if (!project || project.ownerId !== session.user.id) throw new Error('Only owners can add members');
+
+  await db.projectMember.upsert({
+    where: { projectId_userId: { projectId, userId } },
+    update: {},
+    create: { projectId, userId, role: 'MEMBER' }
+  });
+
+  await db.auditLog.create({
+    data: {
+      action: 'ADD_COLLABORATOR',
+      userId: session.user.id,
+      details: `Added user ${userId} to project ${projectId}`,
+    },
+  });
+
+  revalidatePath(`/projects/${projectId}`);
+}
+
+export async function removeProjectMemberAction(projectId: number, userId: number) {
+  const session = await getSession();
+  if (!session || !session.user || !session.user.id) throw new Error('Unauthorized');
+
+  const project = await db.project.findUnique({ where: { id: projectId } });
+  if (!project || project.ownerId !== session.user.id) throw new Error('Only owners can remove members');
+
+  await db.projectMember.delete({
+    where: { projectId_userId: { projectId, userId } }
+  });
+
+  await db.auditLog.create({
+    data: {
+      action: 'REMOVE_COLLABORATOR',
+      userId: session.user.id,
+      details: `Removed user ${userId} from project ${projectId}`,
+    },
+  });
+
+  revalidatePath(`/projects/${projectId}`);
+}
+
 export async function updateProfileAction(formData: FormData) {
   const session = await getSession();
   if (!session || !session.user || !session.user.id) throw new Error('Unauthorized');
