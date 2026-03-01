@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { redirect, notFound } from "next/navigation";
 import TaskBoard from "@/components/TaskBoard";
 import ProjectMembers from "@/components/ProjectMembers";
-import { ArrowLeft, FolderOpen, LayoutDashboard, Shield } from 'lucide-react';
+import { ArrowLeft, FolderOpen, LayoutDashboard, Shield, FileText } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function ProjectDetailsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -70,8 +70,15 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
             </div>
 
             <div className="flex items-center gap-4">
+              <Link 
+                href={`/projects/${project.id}/report`} 
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-indigo-100 transition-all border border-indigo-100"
+              >
+                <FileText size={14} />
+                Project Report
+              </Link>
               <div className="hidden sm:flex flex-col items-end mr-2">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Project Status</span>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Status</span>
                 <span className="text-sm font-bold text-slate-900">{project.status}</span>
               </div>
               <Link href="/" className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg shadow-slate-200">
