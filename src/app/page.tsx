@@ -58,6 +58,12 @@ export default async function Home() {
     _count: true
   });
 
+  const notifications = await db.notification.findMany({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: 'desc' },
+    take: 10
+  });
+
   const stats = {
     totalProjects: projects.length,
     totalTasks: taskStats.reduce((acc, curr) => acc + curr._count, 0),
@@ -70,5 +76,6 @@ export default async function Home() {
     userName={session.user.name || session.user.email} 
     userRole={session.user.role} 
     stats={stats} 
+    notifications={notifications}
   />;
 }

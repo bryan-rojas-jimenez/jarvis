@@ -27,6 +27,7 @@ model User {
   memberships   ProjectMember[]
   tasks         Task[]    // Tareas asignadas al usuario
   logs          AuditLog[] // Historial de acciones del usuario
+  notifications Notification[]
 }
 
 // Modelo de Proyecto (Cumple con: Organización del Trabajo)
@@ -88,4 +89,16 @@ model AuditLog {
   // Relaciones
   userId    Int?
   user      User?    @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  title     String
+  message   String
+  type      String   @default("INFO") // INFO, URGENT, DEADLINE
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

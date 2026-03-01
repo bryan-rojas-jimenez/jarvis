@@ -5,6 +5,7 @@ import TaskBoard from "@/components/TaskBoard";
 import ProjectMembers from "@/components/ProjectMembers";
 import { ArrowLeft, FolderOpen, LayoutDashboard, Shield, FileText } from 'lucide-react';
 import Link from 'next/link';
+import Notifications from "@/components/Notifications";
 
 export default async function ProjectDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
@@ -13,6 +14,13 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
   const { id } = await params;
   const projectId = parseInt(id);
   if (isNaN(projectId)) notFound();
+
+  // Fetch notifications
+  const notifications = await db.notification.findMany({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: 'desc' },
+    take: 10
+  });
 
   // Fetch users for assignment
   const allUsers = await db.user.findMany({
@@ -70,6 +78,9 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
             </div>
 
             <div className="flex items-center gap-4">
+              <Notifications notifications={notifications} />
+              <div className="h-6 w-px bg-slate-100" />
+              
               <Link 
                 href={`/projects/${project.id}/report`} 
                 className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-indigo-100 transition-all border border-indigo-100"

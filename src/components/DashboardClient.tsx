@@ -7,13 +7,15 @@ import Link from 'next/link';
 import { logoutAction, deleteProjectAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import DashboardStats from './DashboardStats';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
+import Notifications from './Notifications';
 
 interface Project {
   id: number;
   name: string;
   description: string | null;
   status: string;
-  dueDate: Date | null; // Added dueDate
+  dueDate: Date | null;
   createdAt: Date;
   updatedAt: Date;
   _count?: {
@@ -25,6 +27,7 @@ interface DashboardProps {
   projects: Project[];
   userName: string;
   userRole: string;
+  notifications: any[]; // Added notifications
   stats: {
     totalProjects: number;
     totalTasks: number;
@@ -33,7 +36,8 @@ interface DashboardProps {
   };
 }
 
-export default function DashboardClient({ projects, userName, userRole, stats }: DashboardProps) {
+export default function DashboardClient({ projects, userName, userRole, stats, notifications }: DashboardProps) {
+  const { dict, language, setLanguage } = useLanguage();
   const [isCreating, setIsCreating] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -77,21 +81,42 @@ export default function DashboardClient({ projects, userName, userRole, stats }:
               </div>
               
               <div className="hidden md:flex items-center gap-1">
-                <Link href="/" className="px-4 py-2 bg-slate-50 text-indigo-600 rounded-lg font-bold text-sm">Dashboard</Link>
+                <Link href="/" className="px-4 py-2 bg-slate-50 text-indigo-600 rounded-lg font-bold text-sm">{dict.nav.dashboard}</Link>
                 <Link href="/my-tasks" className="px-4 py-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors">
                   <ListTodo size={16} />
-                  My Tasks
+                  {dict.nav.my_tasks}
                 </Link>
                 {userRole === 'ADMIN' && (
                   <Link href="/audit" className="px-4 py-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-50 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors">
                     <ShieldAlert size={16} />
-                    Audit Logs
+                    {dict.nav.audit}
                   </Link>
                 )}
               </div>
             </div>
 
             <div className="flex items-center gap-6">
+              {/* Notifications Component */}
+              <Notifications notifications={notifications} />
+
+              <div className="h-6 w-px bg-slate-100 hidden md:block" />
+
+              {/* Language Switcher */}
+              <div className="hidden sm:flex bg-slate-100 p-1 rounded-xl items-center">
+                <button 
+                  onClick={() => setLanguage('es')}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${language === 'es' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  ES
+                </button>
+                <button 
+                  onClick={() => setLanguage('en')}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${language === 'en' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  EN
+                </button>
+              </div>
+
               <div className="hidden sm:flex flex-col items-end mr-2">
                 <span className="text-sm font-black text-slate-900 leading-none">{userName}</span>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{userRole} Profile</span>
@@ -102,7 +127,7 @@ export default function DashboardClient({ projects, userName, userRole, stats }:
                 </div>
               </Link>
               <button onClick={handleLogout} className="px-4 py-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl font-black text-xs uppercase tracking-wider transition-colors">
-                Exit
+                {dict.nav.exit}
               </button>
             </div>
           </div>
@@ -112,15 +137,15 @@ export default function DashboardClient({ projects, userName, userRole, stats }:
       <main className="max-w-[1600px] mx-auto py-10 px-6 lg:px-10">
         <header className="mb-12 flex flex-col md:flex-row justify-between items-end md:items-center gap-6">
           <div>
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Workspace</h1>
-            <p className="text-slate-500 font-medium">Welcome back, <span className="text-indigo-600 font-bold">{userName}</span>. Here's what's happening today.</p>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">{dict.dashboard.workspace}</h1>
+            <p className="text-slate-500 font-medium">{dict.dashboard.welcome_back}, <span className="text-indigo-600 font-bold">{userName}</span>.</p>
           </div>
           <button
             onClick={() => setIsCreating(true)}
             className="group relative inline-flex items-center px-8 py-4 bg-slate-900 text-white font-black rounded-2xl shadow-xl shadow-slate-200 hover:bg-indigo-600 hover:shadow-indigo-200 transition-all hover:-translate-y-1 active:scale-95 overflow-hidden"
           >
             <Plus className="h-5 w-5 mr-2" />
-            <span>Create New Project</span>
+            <span>{dict.dashboard.new_project}</span>
           </button>
         </header>
 
@@ -136,7 +161,7 @@ export default function DashboardClient({ projects, userName, userRole, stats }:
             <input
               type="text"
               className="flex-1 py-2 text-slate-900 placeholder-slate-400 focus:outline-none font-medium text-sm"
-              placeholder="Search projects by name or description..."
+              placeholder={dict.dashboard.search_placeholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -155,10 +180,10 @@ export default function DashboardClient({ projects, userName, userRole, stats }:
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
-                <option value="ALL">All Status</option>
-                <option value="ACTIVE">Active Only</option>
-                <option value="COMPLETED">Completed</option>
-                <option value="ARCHIVED">Archived</option>
+                <option value="ALL">{dict.dashboard.all_status}</option>
+                <option value="ACTIVE">{dict.dashboard.active}</option>
+                <option value="COMPLETED">{dict.dashboard.completed}</option>
+                <option value="ARCHIVED">{dict.dashboard.archived}</option>
               </select>
             </div>
           </div>
@@ -185,20 +210,12 @@ export default function DashboardClient({ projects, userName, userRole, stats }:
             <div className="h-20 w-20 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
               <FolderOpen className="h-10 w-10 text-slate-300" />
             </div>
-            <h3 className="text-2xl font-black text-slate-900 mb-2">No projects found</h3>
+            <h3 className="text-2xl font-black text-slate-900 mb-2">{dict.dashboard.no_projects}</h3>
             <p className="text-slate-500 font-medium max-w-sm mx-auto mb-10">
               {searchQuery || statusFilter !== 'ALL' 
                 ? "We couldn't find anything matching your current filters. Try resetting them." 
                 : "Your workspace is empty. Start by creating your first project to organize your team."}
             </p>
-            {!searchQuery && statusFilter === 'ALL' && (
-              <button
-                onClick={() => setIsCreating(true)}
-                className="px-8 py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all hover:scale-105 active:scale-95"
-              >
-                Launch First Project
-              </button>
-            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -247,19 +264,19 @@ export default function DashboardClient({ projects, userName, userRole, stats }:
                       project.status === 'COMPLETED' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
                       'bg-slate-50 text-slate-600 border-slate-100'
                     }`}>
-                      {project.status}
+                      {project.status === 'ACTIVE' ? dict.dashboard.active : project.status === 'COMPLETED' ? dict.dashboard.completed : dict.dashboard.archived}
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       <div className="flex items-center text-[11px] font-bold text-slate-400 uppercase tracking-tight">
                         <Calendar size={12} className="mr-1" />
-                        Updated {new Date(project.updatedAt).toLocaleDateString()}
+                        {new Date(project.updatedAt).toLocaleDateString()}
                       </div>
                       {project.dueDate && (
                         <div className={`flex items-center text-[10px] font-black uppercase tracking-widest ${
                           new Date(project.dueDate) < new Date() ? 'text-rose-500' : 'text-indigo-500'
                         }`}>
                           <Clock size={12} className="mr-1" />
-                          Due {new Date(project.dueDate).toLocaleDateString()}
+                          {new Date(project.dueDate).toLocaleDateString()}
                         </div>
                       )}
                     </div>
@@ -268,7 +285,7 @@ export default function DashboardClient({ projects, userName, userRole, stats }:
 
                 <Link href={`/projects/${project.id}`} className="block w-full py-5 bg-slate-50 hover:bg-slate-900 group/btn transition-all border-t border-slate-100">
                   <div className="flex items-center justify-center gap-2 text-slate-900 group-hover/btn:text-white font-black text-xs uppercase tracking-widest">
-                    Manage Workspace
+                    {dict.dashboard.manage}
                     <LayoutGrid size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                   </div>
                 </Link>

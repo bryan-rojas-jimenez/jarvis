@@ -1,12 +1,20 @@
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
-import { ListTodo, ArrowLeft, ExternalLink, Calendar, AlertCircle } from 'lucide-react';
+import { ListTodo, ArrowLeft, ExternalLink, Calendar, AlertCircle, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
+import Notifications from "@/components/Notifications";
 
 export default async function MyTasksPage() {
   const session = await getSession();
   if (!session) redirect("/login");
+
+  // Fetch notifications
+  const notifications = await db.notification.findMany({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: 'desc' },
+    take: 10
+  });
 
   // Fetch all tasks assigned to this user
   const tasks = await db.task.findMany({
@@ -41,6 +49,15 @@ export default async function MyTasksPage() {
                 </div>
                 <h1 className="text-xl font-black text-slate-900 tracking-tight">My Workspace</h1>
               </div>
+            </div>
+
+            <div className="flex items-center gap-6">
+              <Notifications notifications={notifications} />
+              <div className="h-6 w-px bg-slate-100" />
+              <Link href="/" className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg shadow-slate-200">
+                <LayoutDashboard size={14} />
+                Home
+              </Link>
             </div>
           </div>
         </div>

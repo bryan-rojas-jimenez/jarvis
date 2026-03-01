@@ -47,7 +47,7 @@ export async function updateProjectAction(projectId: number, formData: FormData)
     data: {
       action: 'UPDATE_PROJECT',
       userId: session.user.id,
-      details: `Updated project: ${name}${dueDate ? ` (Deadline: ${dueDateRaw})` : ''}`,
+      details: `Updated project: ${name}${dueDate ? ` (New Deadline: ${dueDateRaw})` : ''}`,
     },
   });
 
@@ -58,6 +58,18 @@ export async function updateProjectAction(projectId: number, formData: FormData)
 export async function logoutAction() {
   await logout();
   redirect('/login');
+}
+
+export async function markNotificationAsReadAction(notificationId: number) {
+  const session = await getSession();
+  if (!session || !session.user || !session.user.id) throw new Error('Unauthorized');
+
+  await db.notification.update({
+    where: { id: notificationId },
+    data: { read: true },
+  });
+
+  revalidatePath('/');
 }
 
 export async function createProjectAction(formData: FormData) {
@@ -141,6 +153,18 @@ export async function createTaskAction(formData: FormData) {
       update: {},
       create: { projectId, userId: assigneeId, role: 'MEMBER' }
     });
+
+    // Notify assignee
+    if (assigneeId !== session.user.id) {
+      await db.notification.create({
+        data: {
+          userId: assigneeId,
+          title: 'New Task Assigned',
+          message: `You have been assigned to: ${title}`,
+          type: 'INFO'
+        }
+      });
+    }
   }
 
   await db.auditLog.create({
@@ -178,6 +202,18 @@ export async function updateTaskAction(taskId: number, formData: FormData, proje
       update: {},
       create: { projectId, userId: assigneeId, role: 'MEMBER' }
     });
+
+    // Notify assignee
+    if (assigneeId !== session.user.id) {
+      await db.notification.create({
+        data: {
+          userId: assigneeId,
+          title: 'Task Updated',
+          message: `Update on your task: ${title}`,
+          type: 'INFO'
+        }
+      });
+    }
   }
 
   await db.auditLog.create({
@@ -223,6 +259,18 @@ export async function addProjectMemberAction(projectId: number, userId: number) 
     update: {},
     create: { projectId, userId, role: 'MEMBER' }
   });
+
+  // Notify new member
+  if (userId !== session.user.id) {
+    await db.notification.create({
+      data: {
+        userId: userId,
+        title: 'Project Invitation',
+        message: `You have been added to the project: ${project.name}`,
+        type: 'INFO'
+      }
+    });
+  }
 
   await db.auditLog.create({
     data: {

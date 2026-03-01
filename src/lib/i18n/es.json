@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "dashboard": "Panel Principal",
+    "my_tasks": "Mis Tareas",
+    "audit": "Auditoría",
+    "exit": "Salir",
+    "home": "Inicio"
+  },
+  "dashboard": {
+    "workspace": "Espacio de Trabajo",
+    "welcome_back": "Bienvenido de nuevo",
+    "new_project": "Nuevo Proyecto",
+    "search_placeholder": "Buscar proyectos por nombre o descripción...",
+    "all_status": "Todos los Estados",
+    "active": "Activo",
+    "completed": "Completado",
+    "archived": "Archivado",
+    "no_projects": "No se encontraron proyectos",
+    "manage": "Gestionar"
+  },
+  "stats": {
+    "projects": "Proyectos Activos",
+    "progress": "En Progreso",
+    "done": "Completado",
+    "urgent": "Tareas Urgentes",
+    "status_analysis": "Análisis de Estado",
+    "priority_dist": "Distribución de Prioridad"
+  },
+  "kanban": {
+    "add_task": "Nueva Tarea",
+    "report": "Reporte de Proyecto",
+    "todo": "Por Hacer",
+    "in_progress": "En Progreso",
+    "completed": "Completado",
+    "unassigned": "Sin Asignar",
+    "queue_empty": "Cola Vacía"
+  }
+}

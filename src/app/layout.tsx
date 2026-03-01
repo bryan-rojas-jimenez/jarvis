@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Next.js 14 Task and Project Management System",
 };
 
+import { LanguageProvider } from "@/lib/i18n/LanguageContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,7 +29,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );

@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "my_tasks": "My Tasks",
+    "audit": "Audit Logs",
+    "exit": "Exit",
+    "home": "Home"
+  },
+  "dashboard": {
+    "workspace": "Workspace",
+    "welcome_back": "Welcome back",
+    "new_project": "New Project",
+    "search_placeholder": "Search projects by name or description...",
+    "all_status": "All Status",
+    "active": "Active",
+    "completed": "Completed",
+    "archived": "Archived",
+    "no_projects": "No projects found",
+    "manage": "Manage Workspace"
+  },
+  "stats": {
+    "projects": "Active Projects",
+    "progress": "In Progress",
+    "done": "Completed",
+    "urgent": "Urgent Tasks",
+    "status_analysis": "Status Analysis",
+    "priority_dist": "Priority Distribution"
+  },
+  "kanban": {
+    "add_task": "New Task",
+    "report": "Project Report",
+    "todo": "To Do",
+    "in_progress": "In Progress",
+    "completed": "Completed",
+    "unassigned": "Unassigned",
+    "queue_empty": "Queue Empty"
+  }
+}

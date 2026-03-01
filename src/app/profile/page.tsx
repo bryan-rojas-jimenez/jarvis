@@ -4,10 +4,18 @@ import { redirect } from "next/navigation";
 import { updateProfileAction } from "@/app/actions";
 import { User as UserIcon, Mail, Shield, Briefcase, ArrowLeft, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
+import Notifications from "@/components/Notifications";
 
 export default async function ProfilePage() {
   const session = await getSession();
   if (!session) redirect("/login");
+
+  // Fetch notifications
+  const notifications = await db.notification.findMany({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: 'desc' },
+    take: 10
+  });
 
   const user = await db.user.findUnique({
     where: { id: session.user.id }
@@ -33,7 +41,9 @@ export default async function ProfilePage() {
               </div>
             </div>
 
-            <div className="flex items-center">
+            <div className="flex items-center gap-6">
+              <Notifications notifications={notifications} />
+              <div className="h-6 w-px bg-slate-100" />
               <Link href="/" className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg shadow-slate-200">
                 <LayoutDashboard size={14} />
                 Home

@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ShieldAlert, Clock, LayoutDashboard } from "lucide-react";
+import Notifications from "@/components/Notifications";
 
 export default async function AuditPage() {
   const session = await getSession();
@@ -12,6 +13,13 @@ export default async function AuditPage() {
   if (session.user.role !== 'ADMIN') {
     redirect("/");
   }
+
+  // Fetch notifications
+  const notifications = await db.notification.findMany({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: 'desc' },
+    take: 10
+  });
 
   // Fetch the last 100 logs
   const logs = await db.auditLog.findMany({
@@ -44,7 +52,9 @@ export default async function AuditPage() {
               </div>
             </div>
             
-            <div className="flex items-center">
+            <div className="flex items-center gap-6">
+              <Notifications notifications={notifications} />
+              <div className="h-6 w-px bg-slate-100" />
               <Link href="/" className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg shadow-slate-200">
                 <LayoutDashboard size={14} />
                 Home
