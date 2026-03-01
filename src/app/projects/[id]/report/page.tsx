@@ -47,7 +47,7 @@ export default async function ProjectReportPage({ params }: { params: Promise<{ 
           &larr; Back to Workspace
         </Link>
         <button 
-          onClick={() => window.print()}
+          onClick={() => typeof window !== 'undefined' && window.print()}
           className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-black rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all"
         >
           <Printer size={18} />
@@ -63,7 +63,7 @@ export default async function ProjectReportPage({ params }: { params: Promise<{ 
               <FileText size={14} />
               Official Project Status Report
             </div>
-            <h1 className="text-5xl font-black tracking-tight">{project.name}</h1>
+            <h1 className="text-5xl font-black tracking-tight">{project.name || 'Untitled Project'}</h1>
           </div>
           <div className="text-right">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Generated On</p>
@@ -74,13 +74,13 @@ export default async function ProjectReportPage({ params }: { params: Promise<{ 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Project Owner</p>
-            <p className="font-bold text-lg">{project.owner.name || project.owner.email}</p>
-            <p className="text-sm text-slate-500">{project.owner.position || "Management"}</p>
+            <p className="font-bold text-lg">{project.owner?.name || project.owner?.email || "Unknown"}</p>
+            <p className="text-sm text-slate-500">{project.owner?.position || "Management"}</p>
           </div>
           <div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Current Status</p>
             <span className="px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100 font-black text-xs uppercase">
-              {project.status}
+              {project.status || 'ACTIVE'}
             </span>
           </div>
           <div>
@@ -139,7 +139,7 @@ export default async function ProjectReportPage({ params }: { params: Promise<{ 
             {project.tasks.map((task) => (
               <tr key={task.id} className="hover:bg-slate-50/50 transition-colors">
                 <td className="p-4">
-                  <p className="font-bold text-slate-900">{task.title}</p>
+                  <p className="font-bold text-slate-900">{task.title || 'Untitled Task'}</p>
                   <p className="text-[10px] text-slate-400 mt-0.5 leading-tight max-w-xs">{task.description || "N/A"}</p>
                 </td>
                 <td className="p-4 text-sm font-medium text-slate-600">
@@ -151,7 +151,7 @@ export default async function ProjectReportPage({ params }: { params: Promise<{ 
                     task.priority === 'HIGH' ? 'bg-amber-50 text-amber-700 border-amber-100' :
                     'bg-slate-50 text-slate-500 border-slate-100'
                   }`}>
-                    {task.priority}
+                    {task.priority || 'MEDIUM'}
                   </span>
                 </td>
                 <td className="p-4 text-sm font-bold text-slate-500">
@@ -162,7 +162,7 @@ export default async function ProjectReportPage({ params }: { params: Promise<{ 
                     task.status === 'DONE' ? 'text-emerald-600' : 
                     task.status === 'IN_PROGRESS' ? 'text-indigo-600' : 'text-slate-400'
                   }`}>
-                    {task.status.replace('_', ' ')}
+                    {task.status?.replace('_', ' ') || 'TODO'}
                   </span>
                 </td>
               </tr>
@@ -180,12 +180,12 @@ export default async function ProjectReportPage({ params }: { params: Promise<{ 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
             <p className="text-xs font-black text-indigo-600 uppercase tracking-widest mb-1">Owner</p>
-            <p className="font-bold text-sm">{project.owner.name || project.owner.email}</p>
+            <p className="font-bold text-sm">{project.owner?.name || project.owner?.email || "Unknown"}</p>
           </div>
           {project.members.map(member => (
             <div key={member.id} className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
-              <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">{member.role}</p>
-              <p className="font-bold text-sm">{member.user.name || member.user.email}</p>
+              <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">{member.role || 'MEMBER'}</p>
+              <p className="font-bold text-sm">{member.user?.name || member.user?.email || "Unknown"}</p>
             </div>
           ))}
         </div>
@@ -196,13 +196,6 @@ export default async function ProjectReportPage({ params }: { params: Promise<{ 
         <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">JARVIS Project Intelligence System</p>
         <p className="text-[9px] text-slate-300 font-medium">This is a confidential document for internal organizational use only.</p>
       </footer>
-
-      {/* Styles for print window control */}
-      <script dangerouslySetInnerHTML={{ __html: `
-        if (typeof window !== 'undefined') {
-          // Additional logic if needed
-        }
-      `}} />
     </div>
   );
 }
