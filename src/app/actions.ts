@@ -35,17 +35,19 @@ export async function updateProjectAction(projectId: number, formData: FormData)
   const name = formData.get('name') as string;
   const description = formData.get('description') as string;
   const status = formData.get('status') as string || 'ACTIVE';
+  const dueDateRaw = formData.get('dueDate') as string;
+  const dueDate = dueDateRaw ? new Date(dueDateRaw) : null;
 
   const project = await db.project.update({
     where: { id: projectId },
-    data: { name, description, status },
+    data: { name, description, status, dueDate },
   });
 
   await db.auditLog.create({
     data: {
       action: 'UPDATE_PROJECT',
       userId: session.user.id,
-      details: `Updated project: ${name}`,
+      details: `Updated project: ${name}${dueDate ? ` (Deadline: ${dueDateRaw})` : ''}`,
     },
   });
 
@@ -60,33 +62,29 @@ export async function logoutAction() {
 
 export async function createProjectAction(formData: FormData) {
   const session = await getSession();
-  
-  // We check if session exists and has a user with an ID
-  if (!session || !session.user || !session.user.id) {
-    throw new Error('Unauthorized');
-  }
+  if (!session || !session.user || !session.user.id) throw new Error('Unauthorized');
 
   const name = formData.get('name') as string;
   const description = formData.get('description') as string;
+  const dueDateRaw = formData.get('dueDate') as string;
+  const dueDate = dueDateRaw ? new Date(dueDateRaw) : null;
 
-  if (!name) {
-    throw new Error('Project name is required');
-  }
+  if (!name) throw new Error('Project name is required');
 
   const project = await db.project.create({
     data: {
       name,
       description,
       ownerId: session.user.id,
+      dueDate,
     },
   });
 
-  // Log project creation
   await db.auditLog.create({
     data: {
       action: 'CREATE_PROJECT',
       userId: session.user.id,
-      details: `Created project: ${name}`,
+      details: `Created project: ${name}${dueDate ? ` (Deadline: ${dueDateRaw})` : ''}`,
     },
   });
 
@@ -121,6 +119,8 @@ export async function createTaskAction(formData: FormData) {
   const priority = formData.get('priority') as string || 'MEDIUM';
   const assigneeIdRaw = formData.get('assigneeId') as string;
   const assigneeId = assigneeIdRaw ? parseInt(assigneeIdRaw) : null;
+  const dueDateRaw = formData.get('dueDate') as string;
+  const dueDate = dueDateRaw ? new Date(dueDateRaw) : null;
 
   if (!title || !projectId) throw new Error('Title and Project ID are required');
 
@@ -131,10 +131,10 @@ export async function createTaskAction(formData: FormData) {
       priority,
       projectId,
       assigneeId,
+      dueDate,
     },
   });
 
-  // If there is an assignee, ensure they are added as a member
   if (assigneeId) {
     await db.projectMember.upsert({
       where: { projectId_userId: { projectId, userId: assigneeId } },
@@ -147,7 +147,7 @@ export async function createTaskAction(formData: FormData) {
     data: {
       action: 'CREATE_TASK',
       userId: session.user.id,
-      details: `Created task: ${title} in project ${projectId}${assigneeId ? ` assigned to user ${assigneeId}` : ''}`,
+      details: `Created task: ${title} in project ${projectId}${dueDate ? ` (Deadline: ${dueDateRaw})` : ''}`,
     },
   });
 
@@ -164,13 +164,14 @@ export async function updateTaskAction(taskId: number, formData: FormData, proje
   const priority = formData.get('priority') as string;
   const assigneeIdRaw = formData.get('assigneeId') as string;
   const assigneeId = assigneeIdRaw ? parseInt(assigneeIdRaw) : null;
+  const dueDateRaw = formData.get('dueDate') as string;
+  const dueDate = dueDateRaw ? new Date(dueDateRaw) : null;
 
   await db.task.update({
     where: { id: taskId },
-    data: { title, description, priority, assigneeId },
+    data: { title, description, priority, assigneeId, dueDate },
   });
 
-  // If there is an assignee, ensure they are added as a member
   if (assigneeId) {
     await db.projectMember.upsert({
       where: { projectId_userId: { projectId, userId: assigneeId } },
@@ -183,7 +184,7 @@ export async function updateTaskAction(taskId: number, formData: FormData, proje
     data: {
       action: 'UPDATE_TASK',
       userId: session.user.id,
-      details: `Updated task: ${title}${assigneeId ? ` assigned to user ${assigneeId}` : ''}`,
+      details: `Updated task: ${title}${dueDate ? ` (New Deadline: ${dueDateRaw})` : ''}`,
     },
   });
 
@@ -214,7 +215,6 @@ export async function addProjectMemberAction(projectId: number, userId: number) 
   const session = await getSession();
   if (!session || !session.user || !session.user.id) throw new Error('Unauthorized');
 
-  // Verify ownership
   const project = await db.project.findUnique({ where: { id: projectId } });
   if (!project || project.ownerId !== session.user.id) throw new Error('Only owners can add members');
 
@@ -269,7 +269,6 @@ export async function updateProfileAction(formData: FormData) {
     data: { name, position },
   });
 
-  // Update session with new name if needed
   await login(user);
 
   await db.auditLog.create({
@@ -288,31 +287,19 @@ export async function registerAction(formData: FormData) {
   const password = formData.get('password') as string;
   const name = formData.get('name') as string;
 
-  if (!email || !password) {
-    throw new Error('Email and password are required');
-  }
+  if (!email || !password) throw new Error('Email and password are required');
 
   const existingUser = await db.user.findUnique({ where: { email } });
-  if (existingUser) {
-    throw new Error('User already exists');
-  }
+  if (existingUser) throw new Error('User already exists');
 
   const hashedPassword = await bcrypt.hash(password, 10);
-
-  // Check for specific ADMIN email or first user
   const userCount = await db.user.count();
   const role = (userCount === 0 || email.toLowerCase() === 'bryan-rojas@hotmail.com') ? 'ADMIN' : 'USER';
 
   const user = await db.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-      name,
-      role,
-    },
+    data: { email, password: hashedPassword, name, role },
   });
 
-  // Log registration
   await db.auditLog.create({
     data: {
       action: 'REGISTER',
@@ -329,21 +316,14 @@ export async function loginAction(formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
-  if (!email || !password) {
-    throw new Error('Email and password are required');
-  }
+  if (!email || !password) throw new Error('Email and password are required');
 
   const user = await db.user.findUnique({ where: { email } });
-  if (!user) {
-    throw new Error('Invalid credentials');
-  }
+  if (!user) throw new Error('Invalid credentials');
 
   const isValid = await bcrypt.compare(password, user.password);
-  if (!isValid) {
-    throw new Error('Invalid credentials');
-  }
+  if (!isValid) throw new Error('Invalid credentials');
 
-  // Log login
   await db.auditLog.create({
     data: {
       action: 'LOGIN',

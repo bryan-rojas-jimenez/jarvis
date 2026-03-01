@@ -35,6 +35,7 @@ model Project {
   name        String
   description String?
   status      String   @default("ACTIVE") // ACTIVE, COMPLETED, ARCHIVED
+  dueDate     DateTime? // Fecha de vencimiento opcional
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   

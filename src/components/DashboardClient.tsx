@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import ProjectForm from './ProjectForm';
-import { Plus, FolderOpen, Calendar, MoreVertical, ShieldAlert, Trash2, Edit2, Search, X, Filter, LayoutGrid, List, ListTodo } from 'lucide-react';
+import { Plus, FolderOpen, Calendar, MoreVertical, ShieldAlert, Trash2, Edit2, Search, X, Filter, LayoutGrid, List, ListTodo, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { logoutAction, deleteProjectAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
@@ -13,6 +13,7 @@ interface Project {
   name: string;
   description: string | null;
   status: string;
+  dueDate: Date | null; // Added dueDate
   createdAt: Date;
   updatedAt: Date;
   _count?: {
@@ -248,9 +249,20 @@ export default function DashboardClient({ projects, userName, userRole, stats }:
                     }`}>
                       {project.status}
                     </div>
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-tight">
-                      Updated {new Date(project.updatedAt).toLocaleDateString()}
-                    </span>
+                    <div className="flex flex-col items-end gap-1">
+                      <div className="flex items-center text-[11px] font-bold text-slate-400 uppercase tracking-tight">
+                        <Calendar size={12} className="mr-1" />
+                        Updated {new Date(project.updatedAt).toLocaleDateString()}
+                      </div>
+                      {project.dueDate && (
+                        <div className={`flex items-center text-[10px] font-black uppercase tracking-widest ${
+                          new Date(project.dueDate) < new Date() ? 'text-rose-500' : 'text-indigo-500'
+                        }`}>
+                          <Clock size={12} className="mr-1" />
+                          Due {new Date(project.dueDate).toLocaleDateString()}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 

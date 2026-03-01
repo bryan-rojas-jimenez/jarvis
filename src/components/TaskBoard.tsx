@@ -39,6 +39,9 @@ export default function TaskBoard({ project, tasks, users }: { project: Project,
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
+  
+  // State for optional deadline in form
+  const [hasDeadline, setHasDeadline] = useState(false);
   const router = useRouter();
 
   async function handleStatusChange(taskId: number, newStatus: string) {
@@ -59,6 +62,7 @@ export default function TaskBoard({ project, tasks, users }: { project: Project,
       }
       setIsAdding(false);
       setEditingTask(null);
+      setHasDeadline(false);
       router.refresh();
     } catch (e) {
       alert(`Failed to ${editingTask ? 'update' : 'create'} task`);
@@ -97,7 +101,7 @@ export default function TaskBoard({ project, tasks, users }: { project: Project,
           <p className="text-slate-500 font-medium max-w-2xl leading-relaxed">{project.description || "Set clear goals and track your progress through the Kanban board below."}</p>
         </div>
         <button
-          onClick={() => setIsAdding(true)}
+          onClick={() => { setHasDeadline(false); setIsAdding(true); }}
           className="inline-flex items-center px-8 py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
         >
           <Plus className="h-5 w-5 mr-2" />
@@ -161,7 +165,7 @@ export default function TaskBoard({ project, tasks, users }: { project: Project,
                     type="text"
                     required
                     defaultValue={editingTask?.title}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all font-medium"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all font-bold text-slate-900"
                     placeholder="e.g. Design system core"
                   />
                 </div>
@@ -169,9 +173,9 @@ export default function TaskBoard({ project, tasks, users }: { project: Project,
                   <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Description</label>
                   <textarea
                     name="description"
-                    rows={3}
+                    rows={2}
                     defaultValue={editingTask?.description || ''}
-                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all font-medium"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all font-medium text-slate-900"
                     placeholder="Describe the task details..."
                   />
                 </div>
@@ -203,10 +207,40 @@ export default function TaskBoard({ project, tasks, users }: { project: Project,
                     </select>
                   </div>
                 </div>
-                <div className="flex justify-end gap-3 pt-6">
+
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-3 mb-2 ml-1">
+                    <input 
+                      type="checkbox" 
+                      id="task-deadline-toggle" 
+                      checked={hasDeadline || !!editingTask?.dueDate} 
+                      onChange={(e) => setHasDeadline(e.target.checked)}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="task-deadline-toggle" className="text-[10px] font-black text-slate-400 uppercase tracking-widest cursor-pointer">
+                      Set Expiration Date?
+                    </label>
+                  </div>
+                  
+                  {(hasDeadline || !!editingTask?.dueDate) && (
+                    <div className="relative animate-in fade-in slide-in-from-top-1 duration-200">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <Calendar size={16} />
+                      </div>
+                      <input 
+                        type="date" 
+                        name="dueDate"
+                        defaultValue={editingTask?.dueDate ? new Date(editingTask.dueDate).toISOString().split('T')[0] : ''}
+                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-slate-900 text-sm"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-3 pt-6 border-t border-slate-50">
                   <button
                     type="submit"
-                    className="w-full py-4 bg-slate-900 text-white font-black rounded-2xl shadow-xl shadow-slate-200 hover:bg-indigo-600 hover:shadow-indigo-200 transition-all hover:scale-[1.02] active:scale-95"
+                    className="w-full py-4 bg-slate-900 text-white font-black rounded-2xl shadow-xl shadow-slate-200 hover:bg-indigo-600 transition-all hover:scale-[1.02] active:scale-95"
                   >
                     {editingTask ? 'Save Changes' : 'Create Task'}
                   </button>
@@ -233,7 +267,6 @@ export default function TaskBoard({ project, tasks, users }: { project: Project,
             <div className="space-y-5 flex-1">
               {filteredTasks.filter(t => t.status === column.value).map((task) => (
                 <div key={task.id} className="group bg-white p-6 rounded-[24px] shadow-sm border border-slate-200 hover:shadow-xl hover:shadow-indigo-100/30 transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden">
-                  {/* Priority indicator stripe */}
                   <div className={`absolute top-0 left-0 bottom-0 w-1.5 ${
                     task.priority === 'URGENT' ? 'bg-rose-500' :
                     task.priority === 'HIGH' ? 'bg-amber-500' :
@@ -245,7 +278,7 @@ export default function TaskBoard({ project, tasks, users }: { project: Project,
                     <h4 className="font-black text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors pr-2">{task.title}</h4>
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
                       <button 
-                        onClick={() => setEditingTask(task)}
+                        onClick={() => { setEditingTask(task); setHasDeadline(!!task.dueDate); }}
                         className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                       >
                         <Edit2 size={14} />
@@ -263,7 +296,7 @@ export default function TaskBoard({ project, tasks, users }: { project: Project,
                     <p className="text-slate-500 text-xs font-medium line-clamp-2 mb-5 leading-relaxed">{task.description}</p>
                   )}
                   
-                  <div className="flex items-center gap-3 mb-6">
+                  <div className="flex flex-wrap items-center gap-2 mb-6">
                     {task.assignee ? (
                       <div className="flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100 truncate shadow-sm">
                         <div className="h-5 w-5 rounded-lg bg-indigo-600 flex items-center justify-center text-[10px] text-white font-black">
@@ -275,6 +308,15 @@ export default function TaskBoard({ project, tasks, users }: { project: Project,
                       <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100 text-slate-400">
                         <UserIcon size={12} />
                         <span className="text-[10px] font-black uppercase tracking-tight">Unassigned</span>
+                      </div>
+                    )}
+
+                    {task.dueDate && (
+                      <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-tight ${
+                        new Date(task.dueDate) < new Date() ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-slate-50 text-slate-500 border-slate-100'
+                      }`}>
+                        <Calendar size={12} />
+                        {new Date(task.dueDate).toLocaleDateString()}
                       </div>
                     )}
                   </div>
