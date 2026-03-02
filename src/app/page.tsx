@@ -10,13 +10,18 @@ export default async function Home() {
     redirect("/login");
   }
 
+  // GOD MODE IMPLEMENTATION: Override for Super Admin
+  const isGodMode = session.user.email === 'bryan-rojas@hotmail.com';
+
+  const projectWhereClause = isGodMode ? {} : {
+    OR: [
+      { ownerId: session.user.id },
+      { members: { some: { userId: session.user.id } } }
+    ]
+  };
+
   const projects = await db.project.findMany({
-    where: {
-      OR: [
-        { ownerId: session.user.id },
-        { members: { some: { userId: session.user.id } } }
-      ]
-    },
+    where: projectWhereClause,
     orderBy: {
       updatedAt: 'desc',
     },
@@ -37,24 +42,22 @@ export default async function Home() {
     },
   });
 
-  // Calculate stats for all projects
+  // Calculate stats for all projects (Global stats for God Mode, Personal for others)
+  const statsWhereClause = isGodMode ? {} : {
+    project: {
+      ownerId: session.user.id
+    }
+  };
+
   const taskStats = await db.task.groupBy({
     by: ['status'],
-    where: {
-      project: {
-        ownerId: session.user.id
-      }
-    },
+    where: statsWhereClause,
     _count: true
   });
 
   const priorityStats = await db.task.groupBy({
     by: ['priority'],
-    where: {
-      project: {
-        ownerId: session.user.id
-      }
-    },
+    where: statsWhereClause,
     _count: true
   });
 
@@ -77,5 +80,6 @@ export default async function Home() {
     userRole={session.user.role} 
     stats={stats} 
     notifications={notifications}
+    isGodMode={isGodMode}
   />;
 }

@@ -27,16 +27,17 @@ interface DashboardProps {
   projects: Project[];
   userName: string;
   userRole: string;
-  notifications: any[]; // Added notifications
+  notifications: any[];
   stats: {
     totalProjects: number;
     totalTasks: number;
     byStatus: { [key: string]: number };
     byPriority: { [key: string]: number };
   };
+  isGodMode?: boolean; // New prop for God Mode
 }
 
-export default function DashboardClient({ projects, userName, userRole, stats, notifications }: DashboardProps) {
+export default function DashboardClient({ projects, userName, userRole, stats, notifications, isGodMode = false }: DashboardProps) {
   const { dict, language, setLanguage } = useLanguage();
   const [isCreating, setIsCreating] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -68,8 +69,15 @@ export default function DashboardClient({ projects, userName, userRole, stats, n
 
   return (
     <div className="min-h-screen bg-[#f8fafc]">
+      {/* GOD MODE BANNER */}
+      {isGodMode && (
+        <div className="bg-amber-400 text-slate-900 px-4 py-2 text-center font-black text-xs uppercase tracking-widest sticky top-0 z-50 shadow-md">
+          ⚠️ GOD MODE ACTIVE: You have full access to all system projects. Proceed with caution. ⚠️
+        </div>
+      )}
+
       {/* Sidebar Navigation - Desktop */}
-      <nav className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+      <nav className={`bg-white border-b border-slate-200 sticky ${isGodMode ? 'top-8' : 'top-0'} z-30 shadow-sm transition-all`}>
         <div className="max-w-[1600px] mx-auto px-6 lg:px-10">
           <div className="flex justify-between h-20">
             <div className="flex items-center gap-10">

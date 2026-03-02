@@ -50,18 +50,26 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
 
   if (!project) notFound();
 
+  // GOD MODE IMPLEMENTATION
+  const isGodMode = session.user.email === 'bryan-rojas@hotmail.com';
+
   // Check if user is owner OR a member OR has an assigned task
   const isOwner = project.ownerId === session.user.id;
   const isMember = project.members.some(m => m.userId === session.user.id);
   const hasAssignedTask = project.tasks.some(t => t.assigneeId === session.user.id);
 
-  if (!isOwner && !isMember && !hasAssignedTask) {
+  if (!isOwner && !isMember && !hasAssignedTask && !isGodMode) {
     redirect("/");
   }
 
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-20">
-      <nav className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+      {isGodMode && (
+        <div className="bg-amber-400 text-slate-900 px-4 py-2 text-center font-black text-xs uppercase tracking-widest sticky top-0 z-50 shadow-md">
+          ⚠️ GOD MODE ACTIVE: Viewing Project Details ⚠️
+        </div>
+      )}
+      <nav className={`bg-white border-b border-slate-200 sticky ${isGodMode ? 'top-8' : 'top-0'} z-30 shadow-sm transition-all`}>
         <div className="max-w-[1600px] mx-auto px-6 lg:px-10">
           <div className="flex justify-between h-20">
             <div className="flex items-center gap-4">
@@ -108,7 +116,7 @@ export default async function ProjectDetailsPage({ params }: { params: Promise<{
           projectId={project.id} 
           members={project.members} 
           allUsers={allUsers}
-          isOwner={isOwner}
+          isOwner={isOwner || isGodMode}
         />
       </main>
     </div>
