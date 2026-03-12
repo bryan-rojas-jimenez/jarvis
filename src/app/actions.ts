@@ -369,6 +369,33 @@ export async function registerAction(formData: FormData) {
   redirect('/');
 }
 
+export async function resetPasswordAction(formData: FormData) {
+  const email = formData.get('email') as string;
+  const newPassword = formData.get('password') as string;
+
+  if (!email || !newPassword) throw new Error('Email and new password are required');
+
+  const user = await db.user.findUnique({ where: { email } });
+  if (!user) throw new Error('User not found');
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  await db.user.update({
+    where: { email },
+    data: { password: hashedPassword },
+  });
+
+  await db.auditLog.create({
+    data: {
+      action: 'PASSWORD_RESET',
+      userId: user.id,
+      details: `User reset password: ${email}`,
+    },
+  });
+
+  redirect('/login');
+}
+
 export async function loginAction(formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;

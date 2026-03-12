@@ -3,20 +3,23 @@ import type { NextRequest } from 'next/server'
 import { updateSession } from './src/lib/auth'
 
 export async function middleware(request: NextRequest) {
-  // Check if session exists
   const session = request.cookies.get('session')?.value
-  
-  // Protect specific routes
-  if (request.nextUrl.pathname.startsWith('/dashboard') || 
-      request.nextUrl.pathname.startsWith('/projects') || 
-      request.nextUrl.pathname.startsWith('/tasks')) {
+  const path = request.nextUrl.pathname;
+
+  // Protect root path and specific routes
+  if (path === '/' || 
+      path.startsWith('/dashboard') || 
+      path.startsWith('/projects') || 
+      path.startsWith('/tasks') ||
+      path.startsWith('/audit') ||
+      path.startsWith('/profile') ||
+      path.startsWith('/my-tasks')) {
       
     if (!session) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
   }
 
-  // Refresh session if active
   return await updateSession(request)
 }
 
